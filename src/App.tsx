@@ -111,6 +111,7 @@ const Dashboard: React.FC = () => {
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
   const [balanceLoading, setBalanceLoading] = useState(false);
   const [isSigningTransaction, setIsSigningTransaction] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // Escrow state - initialize as empty, fetch from API
   const [escrows, setEscrows] = useState<any[]>([]);
@@ -759,19 +760,40 @@ const Dashboard: React.FC = () => {
   ];
 
   return (
-    <main className="min-h-screen flex bg-black text-white">
+    <main className="min-h-screen flex flex-col md:flex-row bg-black text-white">
+      {/* Sidebar - Mobile Overlay */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 p-6 flex flex-col fixed h-screen left-0 top-0 border-r border-gray-900 bg-black">
-        <div className="mb-12 flex items-center gap-3">
-          {/* Logo placeholder - to be added later */}
-          <div className="w-10 h-10 rounded-lg"></div>
+      <aside className={`fixed md:relative w-64 p-6 flex flex-col h-screen border-r border-gray-900 bg-black z-40 transition-transform md:translate-x-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <img src="/assets/nullfi-logo.svg" alt="Nullfi" className="w-6 h-6" />
+            <span className="text-lg font-bold">Nullfi</span>
+          </div>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="md:hidden text-gray-400 hover:text-white"
+          >
+            ✕
+          </button>
         </div>
 
         <nav className="flex-1 space-y-1">
           {navItems.map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveTab(item.id)}
+              onClick={() => {
+                setActiveTab(item.id);
+                setSidebarOpen(false);
+              }}
               className={`w-full px-4 py-2.5 rounded-lg transition text-left text-sm font-500 ${
                 activeTab === item.id
                   ? 'bg-white text-black'
@@ -798,15 +820,21 @@ const Dashboard: React.FC = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 ml-64">
+      <div className="flex-1 md:ml-0">
         {/* Header */}
         <header className="sticky top-0 z-40 border-b border-gray-900 bg-black">
-          <div className="px-8 py-5 flex justify-between items-center">
+          <div className="px-4 md:px-8 py-5 flex justify-between items-center">
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="md:hidden text-white hover:text-gray-300 text-2xl"
+              >
+                ☰
+              </button>
               <img src="/assets/nullfi-logo.svg" alt="Nullfi" className="w-6 h-6" />
-              <div>
-                <h2 className="text-xl font-600 text-white mb-0.5">Welcome back, {user?.username || 'User'}</h2>
-                <p className="text-sm text-gray-500">Here's your financial overview</p>
+              <div className="hidden sm:block">
+                <h2 className="text-lg md:text-xl font-600 text-white mb-0.5">Welcome back, {user?.username || 'User'}</h2>
+                <p className="text-xs md:text-sm text-gray-500">Here's your financial overview</p>
               </div>
             </div>
             <button
@@ -825,11 +853,11 @@ const Dashboard: React.FC = () => {
         </header>
 
         {/* Content */}
-        <div className="p-8 bg-black flex-1 overflow-y-auto">
+        <div className="p-4 md:p-8 bg-black flex-1 overflow-y-auto">
           {activeTab === 'home' && (
             <div className="space-y-8">
               {/* KPI Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-5">
                 {[
                   { label: 'Wallet Balance', value: walletBalance?.toFixed(2) || '—', unit: 'SUI', icon: '💵', loading: balanceLoading },
                   { label: 'Credit Score', value: creditScore?.rating || '—', unit: '/100', icon: '⭐' },
@@ -839,13 +867,13 @@ const Dashboard: React.FC = () => {
                 ].map((stat, idx) => (
                   <GlowCard key={idx} glowColor="blue">
                     <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs font-600 text-gray-400 uppercase tracking-wide">{stat.label}</p>
-                        <span className="text-lg">{stat.icon}</span>
+                      <div className="flex items-center justify-between mb-2 md:mb-3">
+                        <p className="text-[10px] md:text-xs font-600 text-gray-400 uppercase tracking-wide">{stat.label}</p>
+                        <span className="text-sm md:text-lg">{stat.icon}</span>
                       </div>
-                      <div className="flex items-baseline gap-1">
-                        <p className="text-3xl md:text-2xl font-700 text-white">{stat.value}</p>
-                        {stat.unit && <span className="text-xs text-gray-500">{stat.unit}</span>}
+                      <div className="flex items-baseline gap-0.5">
+                        <p className="text-xl md:text-2xl lg:text-3xl font-700 text-white">{stat.value}</p>
+                        {stat.unit && <span className="text-[10px] md:text-xs text-gray-500">{stat.unit}</span>}
                       </div>
                     </div>
                   </GlowCard>
@@ -854,8 +882,8 @@ const Dashboard: React.FC = () => {
 
               {/* Quick Actions */}
               <div>
-                <h3 className="text-sm font-600 text-white mb-5 uppercase tracking-wide">Quick Actions</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <h3 className="text-xs md:text-sm font-600 text-white mb-3 md:mb-5 uppercase tracking-wide">Quick Actions</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
                   {[
                     { title: 'Create Escrow', desc: 'Start a transaction', action: () => setShowCreateEscrow(true) },
                     { title: 'View Scores', desc: 'Check your rating', action: () => setActiveTab('credit-score') },
@@ -867,8 +895,8 @@ const Dashboard: React.FC = () => {
                         onClick={action.action}
                         className="relative z-10 w-full text-left"
                       >
-                        <h4 className="font-600 text-sm text-white mb-2">{action.title}</h4>
-                        <p className="text-gray-500 text-xs">{action.desc}</p>
+                        <h4 className="font-600 text-[10px] md:text-sm text-white mb-1 md:mb-2">{action.title}</h4>
+                        <p className="text-gray-500 text-[8px] md:text-xs">{action.desc}</p>
                       </button>
                     </GlowCard>
                   ))}
@@ -1330,7 +1358,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setShowLoanForm(!showLoanForm)}
-                  className="px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition"
+                  className="px-3 md:px-6 py-2 md:py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition text-xs md:text-sm"
                 >
                   {showLoanForm ? '✕ Cancel' : '+ Apply for Loan'}
                 </button>
@@ -1655,9 +1683,9 @@ const Dashboard: React.FC = () => {
                 </div>
                 <button
                   onClick={downloadPDF}
-                  className="px-6 py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition flex items-center gap-2"
+                  className="px-3 md:px-6 py-2 md:py-3 bg-white text-black font-semibold rounded-lg hover:bg-white/90 transition flex items-center gap-1 md:gap-2 text-xs md:text-sm"
                 >
-                  📥 Download Statement
+                  📥 <span className="hidden sm:inline">Download Statement</span><span className="sm:hidden">Download</span>
                 </button>
               </div>
 
@@ -1878,12 +1906,12 @@ const Dashboard: React.FC = () => {
                     <p className="text-gray-400 text-xs mb-4">One wallet per account</p>
                     <div className="space-y-3">
                       <div className="bg-white/5 rounded p-4 border border-white/10">
-                        <div className="flex justify-between items-center">
-                          <div>
+                        <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3">
+                          <div className="flex-1 min-w-0">
                             <p className="text-white font-medium text-sm">Primary Wallet</p>
-                            <p className="text-gray-400 text-xs font-mono mt-1">{user?.walletAddress}</p>
+                            <p className="text-gray-400 text-xs font-mono mt-1 break-all">{user?.walletAddress}</p>
                           </div>
-                          <button disabled className="px-3 py-1 bg-red-500/10 text-red-300 rounded text-xs font-medium transition opacity-50 cursor-not-allowed">
+                          <button disabled className="px-3 py-1 bg-red-500/10 text-red-300 rounded text-xs font-medium transition opacity-50 cursor-not-allowed whitespace-nowrap">
                             Remove
                           </button>
                         </div>
@@ -2013,29 +2041,31 @@ const Dashboard: React.FC = () => {
                       <div className="text-gray-400 text-sm">Loading API key...</div>
                     ) : apiKey ? (
                       <>
-                        <div className="flex gap-2">
+                        <div className="space-y-2">
                           <input
                             type={showApiKey ? "text" : "password"}
                             value={apiKey}
                             readOnly
-                            className="flex-1 px-4 py-3 bg-gray-950 border border-gray-900 rounded-lg text-white font-mono text-sm focus:outline-none"
+                            className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-950 border border-gray-900 rounded-lg text-white font-mono text-xs md:text-sm focus:outline-none break-all"
                           />
-                          <button
-                            onClick={() => setShowApiKey(!showApiKey)}
-                            className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition border border-white/10 font-medium"
-                            title={showApiKey ? "Hide" : "Show"}
-                          >
-                            {showApiKey ? '👁️' : '🔒'}
-                          </button>
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(apiKey);
-                              showToast('API key copied!', 'success');
-                            }}
-                            className="px-4 py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition border border-white/10 font-medium"
-                          >
-                            Copy
-                          </button>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => setShowApiKey(!showApiKey)}
+                              className="flex-1 px-2 md:px-4 py-2 md:py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition border border-white/10 font-medium text-xs md:text-sm"
+                              title={showApiKey ? "Hide" : "Show"}
+                            >
+                              {showApiKey ? '👁️' : '🔒'}
+                            </button>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard.writeText(apiKey);
+                                showToast('API key copied!', 'success');
+                              }}
+                              className="flex-1 px-2 md:px-4 py-2 md:py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition border border-white/10 font-medium text-xs md:text-sm"
+                            >
+                              Copy
+                            </button>
+                          </div>
                         </div>
                         <button
                           onClick={async () => {
@@ -2053,7 +2083,7 @@ const Dashboard: React.FC = () => {
                             }
                           }}
                           disabled={apiKeyRegenerating}
-                          className="w-full px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition border border-white/10 font-medium text-sm disabled:opacity-50"
+                          className="w-full px-3 md:px-4 py-2 md:py-3 bg-white/10 hover:bg-white/20 text-white rounded-lg transition border border-white/10 font-medium text-xs md:text-sm disabled:opacity-50"
                         >
                           {apiKeyRegenerating ? 'Regenerating...' : 'Regenerate Key'}
                         </button>
