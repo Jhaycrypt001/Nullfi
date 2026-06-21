@@ -3,12 +3,13 @@
  */
 
 import { SuiClient, getFullnodeUrl } from '@mysten/sui.js/client';
+import { TransactionBlock } from '@mysten/sui.js/transactions';
 
 const suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
 
 export class RealBlockchainExecutor {
   /**
-   * Execute real SUI transfer on blockchain
+   * Execute real SUI transfer on blockchain - ACTUAL TRANSACTION
    */
   static async executeRealTransaction(
     walletAddress: string,
@@ -24,28 +25,36 @@ export class RealBlockchainExecutor {
 
     try {
       // Use wallet passed from component, or try to get from window
-      const connectedWallet = wallet || (window as any).sui;
+      const connectedWallet = wallet || (window as any).okxwallet || (window as any).suiWallet;
 
       if (!connectedWallet) {
         throw new Error('❌ Wallet not connected. Please connect your Sui Wallet first.');
       }
 
-      console.log('📝 Requesting wallet signature...');
+      console.log('📝 Building transaction block...');
 
-      // Create a transfer message to sign
-      const message = new TextEncoder().encode(
-        `Transfer ${amountInMist / 1_000_000_000} SUI to ${recipientAddress}\n${description}`
-      );
+      // Create a real transaction block
+      const txBlock = new TransactionBlock();
+      txBlock.setSender(walletAddress);
 
-      // Sign the message with wallet
-      const signature = await connectedWallet.signMessage({ message });
+      // Split coins to get exact amount
+      const [coin] = txBlock.splitCoins(txBlock.gas, [txBlock.pure.u64(amountInMist)]);
 
-      console.log('✅ TRANSACTION SIGNED!', signature);
+      // Transfer to recipient
+      txBlock.transferObjects([coin], txBlock.pure.address(recipientAddress));
 
-      // Generate transaction digest
-      const digest = 'TxDigest::' + Math.random().toString(36).substring(2, 15);
+      console.log('🔐 Requesting wallet to sign and execute transaction...');
 
-      console.log('🎉 TRANSACTION COMPLETE!');
+      // Sign and execute with wallet - THIS WILL DEDUCT FROM WALLET
+      const result = await connectedWallet.signAndExecuteTransactionBlock({
+        transactionBlock: txBlock,
+      });
+
+      const digest = result.digest || result.transactionHash;
+
+      console.log('✅ TRANSACTION EXECUTED!', digest);
+      console.log('💎 SUI deducted from your wallet!');
+
       return digest;
     } catch (error) {
       console.error('❌ Blockchain execution error:', error);
