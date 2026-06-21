@@ -10,8 +10,7 @@ import { NewsletterCTA } from "@/components/ui/newsletter-cta";
 import { FeaturesGrid } from "@/components/ui/features-grid";
 import { FAQSection } from "@/components/ui/faq-section";
 import { useAuth } from "@/context/AuthContext";
-import { useWallet } from "@suiet/wallet-kit";
-import { SimpleGetStartedButton } from "@/components/SimpleGetStartedButton";
+import { ConnectButton, useWallet } from "@suiet/wallet-kit";
 import React from "react";
 import {
   Zap,
@@ -248,7 +247,19 @@ export default function LandingPage() {
                     Join thousands of developers building on Sui
                   </p>
 
-                  <SimpleGetStartedButton />
+                  {wallet.connected ? (
+                    <div className="text-center">
+                      <p className="text-white mb-4">✅ Wallet Connected!</p>
+                      <button
+                        onClick={() => wallet.disconnect()}
+                        className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 rounded-lg transition"
+                      >
+                        Disconnect
+                      </button>
+                    </div>
+                  ) : (
+                    <ConnectButton />
+                  )}
 
                   <p className="text-xs text-gray-500 mt-4">
                     Connect your Sui wallet to get started instantly

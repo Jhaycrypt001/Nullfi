@@ -2,7 +2,7 @@
 import React, { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useAuth } from "@/context/AuthContext";
-import { SimpleGetStartedButton } from "@/components/SimpleGetStartedButton";
+import { ConnectButton } from "@suiet/wallet-kit";
 
 function NavHeader() {
   const [position, setPosition] = useState({
@@ -56,7 +56,7 @@ function NavHeader() {
             </button>
           </>
         ) : (
-          <SimpleGetStartedButton />
+          <ConnectButton />
         )}
       </div>
     </div>

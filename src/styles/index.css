@@ -48,14 +48,15 @@
   ::-webkit-scrollbar-track { background: transparent; }
 }
 
-/* ConnectButton styling - White background, black text */
+/* ConnectButton - Black background */
 button {
-  background-color: white !important;
-  color: black !important;
+  background-color: #000000 !important;
+  color: white !important;
+  border: none !important;
 }
 
 button:hover {
-  background-color: #e5e7eb !important;
+  background-color: #1a1a1a !important;
 }
 
 @layer utilities {
