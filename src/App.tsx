@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { WalletProvider } from '@suiet/wallet-kit';
 import '@suiet/wallet-kit/style.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -84,7 +84,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -93,6 +93,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 // Dashboard Page with Sidebar
 const Dashboard: React.FC = () => {
   const { user, creditScore, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleGoBack = () => {
     logout();
@@ -812,7 +813,10 @@ const Dashboard: React.FC = () => {
             <p className="text-xs font-mono truncate text-gray-200">{user?.walletAddress?.slice(0, 10)}...</p>
           </div>
           <button
-            onClick={logout}
+            onClick={() => {
+              logout();
+              navigate('/');
+            }}
             className="w-full px-4 py-2.5 font-600 rounded-lg transition bg-red-500/20 text-red-300 hover:bg-red-500/30 text-sm"
           >
             Sign Out

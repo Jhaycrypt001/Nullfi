@@ -36,10 +36,10 @@ export default function LandingPage() {
   }, [wallet.connected, wallet.address, isAuthenticated, walletLogin]);
 
   React.useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && wallet.connected) {
       navigate('/dashboard');
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, wallet.connected, navigate]);
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden pt-20">
       {/* Navigation */}

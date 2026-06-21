@@ -82,6 +82,39 @@ router.get('/verify-token', (req: Request, res: Response) => {
   }
 });
 
+// POST /api/auth/wallet-login
+// Simple wallet login - auto-create user if doesn't exist
+router.post('/wallet-login', async (req: Request, res: Response) => {
+  try {
+    const { walletAddress } = req.body;
+
+    if (!walletAddress) {
+      return res.status(400).json({ error: 'Wallet address required' });
+    }
+
+    const result = await AuthService.walletLogin(walletAddress);
+
+    if (!result.success) {
+      return res.status(401).json({ error: result.error });
+    }
+
+    res.json({
+      success: true,
+      user: {
+        id: result.user!.id,
+        walletAddress: result.user!.walletAddress,
+        email: result.user!.email,
+        username: result.user!.username,
+      },
+      creditScore: result.user!.creditScore,
+      token: result.token,
+    });
+  } catch (error) {
+    console.error('Wallet login error:', error);
+    res.status(500).json({ error: 'Wallet login failed' });
+  }
+});
+
 // POST /api/auth/signup
 // Register a new user
 router.post('/signup', async (req: Request, res: Response) => {

@@ -110,6 +110,57 @@ export class AuthService {
     }
   }
 
+  static async walletLogin(walletAddress: string) {
+    try {
+      // Validate input
+      if (!walletAddress || walletAddress.length < 10) {
+        throw new Error('Invalid wallet address');
+      }
+
+      if (!this.isValidSuiAddress(walletAddress)) {
+        throw new Error('Invalid Sui wallet address format');
+      }
+
+      // Find or create user
+      let user = await prisma.user.findUnique({
+        where: { walletAddress },
+        include: { creditScore: true },
+      });
+
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            walletAddress,
+            email: `${walletAddress}@nullfi.local`,
+            username: `user_${walletAddress.slice(0, 8)}`,
+            creditScore: {
+              create: {
+                rating: 50,
+                tier: 'TIER_4',
+                borrowLimit: 0n,
+              },
+            },
+          },
+          include: { creditScore: true },
+        });
+      }
+
+      // Generate JWT token
+      const token = this.generateToken(user.id, walletAddress);
+
+      return {
+        user,
+        token,
+        success: true,
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: (error as Error).message,
+      };
+    }
+  }
+
   private static isValidSuiAddress(address: string): boolean {
     // Sui addresses are 0x + 64 hex characters
     const suiAddressRegex = /^0x[a-fA-F0-9]{64}$/;

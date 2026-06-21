@@ -121,21 +121,19 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const walletLogin = async (walletAddress: string) => {
     setIsLoading(true);
     try {
-      // Create user object for wallet login
-      const userData = {
-        id: walletAddress,
-        walletAddress: walletAddress,
-        username: `user_${walletAddress.slice(0, 8)}`,
-        email: `${walletAddress}@nullfi.local`,
-      };
+      // Call backend to authenticate wallet and get JWT token
+      const response = await api.walletLogin(walletAddress);
 
-      setUser(userData);
-      setToken(walletAddress);
-      api.setToken(walletAddress);
+      if (response.success && response.user && response.token) {
+        setUser(response.user);
+        setToken(response.token);
 
-      // Store in localStorage
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('authToken', walletAddress);
+        // Store in localStorage
+        localStorage.setItem('user', JSON.stringify(response.user));
+        localStorage.setItem('authToken', response.token);
+      } else {
+        throw new Error(response.error || 'Wallet login failed');
+      }
     } catch (error) {
       console.error('Wallet login error:', error);
       throw error;

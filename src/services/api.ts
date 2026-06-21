@@ -95,6 +95,19 @@ class ApiClient {
     return this.request('/api/auth/verify-token', { method: 'GET' });
   }
 
+  async walletLogin(walletAddress: string): Promise<AuthResponse> {
+    const response = await this.request('/api/auth/wallet-login', {
+      method: 'POST',
+      body: JSON.stringify({ walletAddress }),
+    });
+
+    if (response.token) {
+      this.setToken(response.token);
+    }
+
+    return response;
+  }
+
   async signup(data: { walletAddress: string; email: string; username: string }): Promise<any> {
     return this.request('/api/auth/signup', {
       method: 'POST',
