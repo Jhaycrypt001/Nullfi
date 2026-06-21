@@ -11,6 +11,7 @@ import { FeaturesGrid } from "@/components/ui/features-grid";
 import { FAQSection } from "@/components/ui/faq-section";
 import { useAuth } from "@/context/AuthContext";
 import { ConnectButton, useWallet } from "@suiet/wallet-kit";
+import { useNavigate } from "react-router-dom";
 import React from "react";
 import {
   Zap,
@@ -24,14 +25,21 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
-  const { login, isAuthenticated } = useAuth();
+  const { walletLogin, isAuthenticated } = useAuth();
   const wallet = useWallet();
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     if (wallet.connected && wallet.address && !isAuthenticated) {
-      login(wallet.address, wallet.address);
+      walletLogin(wallet.address);
     }
-  }, [wallet.connected, wallet.address, isAuthenticated, login]);
+  }, [wallet.connected, wallet.address, isAuthenticated, walletLogin]);
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden pt-20">
       {/* Navigation */}

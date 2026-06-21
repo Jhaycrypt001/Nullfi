@@ -22,6 +22,7 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (walletAddress: string, message: string, signature: string, publicKey: string) => Promise<void>;
+  walletLogin: (walletAddress: string) => Promise<void>;
   logout: () => void;
   refreshCreditScore: () => Promise<void>;
 }
@@ -117,6 +118,32 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
+  const walletLogin = async (walletAddress: string) => {
+    setIsLoading(true);
+    try {
+      // Create user object for wallet login
+      const userData = {
+        id: walletAddress,
+        walletAddress: walletAddress,
+        username: `user_${walletAddress.slice(0, 8)}`,
+        email: `${walletAddress}@nullfi.local`,
+      };
+
+      setUser(userData);
+      setToken(walletAddress);
+      api.setToken(walletAddress);
+
+      // Store in localStorage
+      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('authToken', walletAddress);
+    } catch (error) {
+      console.error('Wallet login error:', error);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const logout = () => {
     setUser(null);
     setCreditScore(null);
@@ -146,6 +173,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     isLoading,
     isAuthenticated: !!user && !!token,
     login,
+    walletLogin,
     logout,
     refreshCreditScore,
   };
