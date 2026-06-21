@@ -48,6 +48,16 @@
   ::-webkit-scrollbar-track { background: transparent; }
 }
 
+/* ConnectButton styling - White background, black text */
+button {
+  background-color: white !important;
+  color: black !important;
+}
+
+button:hover {
+  background-color: #e5e7eb !important;
+}
+
 @layer utilities {
   /* Typography scale */
   .text-display-xl { font-size: 4.5rem; line-height: 1.1; letter-spacing: -0.02em; }

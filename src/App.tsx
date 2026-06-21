@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { WalletProvider } from '@suiet/wallet-kit';
+import '@suiet/wallet-kit/style.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Landing from '@/pages/Landing';
 import DocsPage from '@/pages/Docs';
-import { AuthPage } from '@/pages/Auth';
 import { PublicProfile } from '@/pages/PublicProfile';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -2515,7 +2516,6 @@ function AppContent() {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/docs" element={<DocsPage />} />
-      <Route path="/auth" element={<AuthPage />} />
       <Route
         path="/dashboard"
         element={
@@ -2531,13 +2531,15 @@ function AppContent() {
 
 export default function App() {
   return (
-    <>
-      <DashboardStyles />
-      <Router>
-        <AuthProvider>
-          <AppContent />
-        </AuthProvider>
-      </Router>
-    </>
+    <WalletProvider>
+      <>
+        <DashboardStyles />
+        <Router>
+          <AuthProvider>
+            <AppContent />
+          </AuthProvider>
+        </Router>
+      </>
+    </WalletProvider>
   );
 }

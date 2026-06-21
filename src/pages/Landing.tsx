@@ -9,6 +9,10 @@ import { TestimonialsSection } from "@/components/ui/testimonials";
 import { NewsletterCTA } from "@/components/ui/newsletter-cta";
 import { FeaturesGrid } from "@/components/ui/features-grid";
 import { FAQSection } from "@/components/ui/faq-section";
+import { useAuth } from "@/context/AuthContext";
+import { useWallet } from "@suiet/wallet-kit";
+import { SimpleGetStartedButton } from "@/components/SimpleGetStartedButton";
+import React from "react";
 import {
   Zap,
   Shield,
@@ -21,6 +25,14 @@ import {
 } from "lucide-react";
 
 export default function LandingPage() {
+  const { login, isAuthenticated } = useAuth();
+  const wallet = useWallet();
+
+  React.useEffect(() => {
+    if (wallet.connected && wallet.address && !isAuthenticated) {
+      login(wallet.address, wallet.address);
+    }
+  }, [wallet.connected, wallet.address, isAuthenticated, login]);
   return (
     <main className="min-h-screen bg-black text-white overflow-hidden pt-20">
       {/* Navigation */}
@@ -236,30 +248,10 @@ export default function LandingPage() {
                     Join thousands of developers building on Sui
                   </p>
 
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      // Handle submission
-                    }}
-                    className="space-y-4 w-full"
-                  >
-                    <div className="flex flex-col gap-3">
-                      <input
-                        type="email"
-                        placeholder="Enter your email"
-                        className="w-full bg-white/10 border border-white/20 rounded-lg px-4 py-2 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-white/40 transition-colors"
-                      />
-                      <button
-                        type="submit"
-                        className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium py-2 rounded-lg transition-all text-sm"
-                      >
-                        Get Started
-                      </button>
-                    </div>
-                  </form>
+                  <SimpleGetStartedButton />
 
                   <p className="text-xs text-gray-500 mt-4">
-                    No credit card required. Start deploying in minutes.
+                    Connect your Sui wallet to get started instantly
                   </p>
                 </div>
               </BlurFade>

@@ -2,6 +2,7 @@
 import React, { useRef, useState } from "react";
 import { motion } from "motion/react";
 import { useAuth } from "@/context/AuthContext";
+import { SimpleGetStartedButton } from "@/components/SimpleGetStartedButton";
 
 function NavHeader() {
   const [position, setPosition] = useState({
@@ -55,20 +56,7 @@ function NavHeader() {
             </button>
           </>
         ) : (
-          <>
-            <a
-              href="/auth"
-              className="hidden sm:block px-4 py-2 text-sm text-white hover:text-blue-400 transition"
-            >
-              Sign In
-            </a>
-            <a
-              href="/auth"
-              className="px-6 py-2.5 bg-white text-black font-semibold rounded-full hover:bg-gray-200 transition text-sm whitespace-nowrap"
-            >
-              Get Started
-            </a>
-          </>
+          <SimpleGetStartedButton />
         )}
       </div>
     </div>
@@ -89,31 +77,31 @@ const Tab = ({
   return (
     <li
       ref={ref}
-      onMouseEnter={() => {
-        if (!ref.current) return;
-        const { width } = ref.current.getBoundingClientRect();
-        setPosition({
-          width,
-          opacity: 1,
-          left: ref.current.offsetLeft,
-        });
+      onMouseEnter={({ currentTarget }) => {
+        if (!ref?.current) return;
+        const { width } = currentTarget.getBoundingClientRect();
+        const { offsetLeft } = currentTarget;
+        setPosition({ left: offsetLeft, width, opacity: 1 });
       }}
-      className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs uppercase text-white mix-blend-difference md:px-5 md:py-3 md:text-base"
+      className="relative px-4 py-2 cursor-pointer whitespace-nowrap"
     >
-      <a href={href} className="block">
-        {children}
-      </a>
+      {href ? (
+        <a href={href} className="text-white">
+          {children}
+        </a>
+      ) : (
+        children
+      )}
     </li>
   );
 };
 
-const Cursor = ({ position }: { position: any }) => {
-  return (
-    <motion.li
-      animate={position}
-      className="absolute z-0 h-7 rounded-full bg-white/10 md:h-12"
-    />
-  );
-};
+const Cursor = ({ position }: { position: any }) => (
+  <motion.li
+    animate={{ ...position }}
+    className="absolute h-7 bg-white rounded-full"
+    layout
+  />
+);
 
 export default NavHeader;
