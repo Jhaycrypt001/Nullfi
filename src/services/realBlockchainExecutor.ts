@@ -3,7 +3,7 @@
  */
 
 import { SuiClient, getFullnodeUrl } from '@mysten/sui.js/client';
-import { Transaction } from '@mysten/sui.js/transactions';
+import { TransactionBlock } from '@mysten/sui.js/transactions';
 
 const suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
 
@@ -31,7 +31,7 @@ export class RealBlockchainExecutor {
 
     try {
       // Build transaction (just like suipayroll does)
-      const tx = new Transaction();
+      const tx = new TransactionBlock();
       tx.setSender(walletAddress);
 
       // Split gas to get the amount

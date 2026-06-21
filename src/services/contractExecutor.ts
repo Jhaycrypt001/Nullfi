@@ -92,6 +92,24 @@ export class ContractExecutor {
     }
   }
 
+  static async executeEscrow(
+    escrowId: string,
+    clientAddress: string,
+    freelancerAddress: string,
+    amountMist: number
+  ): Promise<ContractResult> {
+    try {
+      // Execute real blockchain transaction
+      return await this.signTransaction(clientAddress, freelancerAddress, amountMist);
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Failed to execute escrow',
+        error: error instanceof Error ? error.message : 'Error',
+      };
+    }
+  }
+
   /**
    * REAL BLOCKCHAIN - Execute with wallet signature
    */

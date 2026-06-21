@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
-import { WalletProvider } from '@suiet/wallet-kit';
+import { WalletProvider, useWallet } from '@suiet/wallet-kit';
 import '@suiet/wallet-kit/style.css';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Landing from '@/pages/Landing';
@@ -94,6 +94,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 const Dashboard: React.FC = () => {
   const { user, creditScore, logout } = useAuth();
   const navigate = useNavigate();
+  const wallet = useWallet();
 
   const handleGoBack = () => {
     logout();
@@ -695,24 +696,38 @@ const Dashboard: React.FC = () => {
       return;
     }
 
+    // Get freelancer address FIRST (before wallet popup)
+    const freelancerAddress = prompt('Enter freelancer Sui wallet address (0x...)');
+    if (!freelancerAddress) {
+      showToast('⏸️ Cancelled', 'error');
+      return;
+    }
+
     setIsSigningTransaction(true);
     try {
       const totalAmountMist = selectedEscrow.totalAmount || 0;
       const amountPerMilestone = Math.floor(totalAmountMist / (selectedEscrow.milestoneCount || 1));
       const amountSUI = (amountPerMilestone / 1_000_000_000).toFixed(2);
 
-      // Get freelancer address
-      const freelancerAddress = prompt('Enter freelancer Sui wallet address (0x...)');
-      if (!freelancerAddress) {
-        showToast('⏸️ Cancelled', 'error');
-        setIsSigningTransaction(false);
-        return;
-      }
+      // Now trigger wallet popup to sign the ACTUAL BLOCKCHAIN TRANSACTION
+      showToast('🔐 Opening wallet to sign & execute transaction...');
 
-      showToast(`✅ ESCROW CONFIRMED!\n💎 Ready to transfer ${amountSUI} SUI\nFreelancer: ${freelancerAddress.slice(0, 10)}...`);
+      // Execute escrow transaction on Sui blockchain
+      const result = await ContractExecutor.executeEscrow(
+        selectedEscrow.id,
+        user.walletAddress,
+        freelancerAddress,
+        totalAmountMist
+      );
+
+      if (result.success) {
+        showToast(`✅ TRANSACTION COMPLETE!\n💎 ${amountSUI} SUI transferred to escrow\n🔗 Tx: ${result.transactionId?.slice(0, 10)}...`);
+      } else {
+        throw new Error(result.error || 'Transaction failed');
+      }
     } catch (error) {
       console.error('Error:', error);
-      showToast(error instanceof Error ? error.message : 'Failed', 'error');
+      showToast(error instanceof Error ? error.message : 'Failed to execute transaction', 'error');
     } finally {
       setIsSigningTransaction(false);
     }
