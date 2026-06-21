@@ -722,7 +722,13 @@ const Dashboard: React.FC = () => {
       );
 
       if (result.success) {
-        showToast(`✅ TRANSACTION COMPLETE!\n💎 ${amountSUI} SUI transferred to escrow\n🔗 Tx: ${result.transactionId?.slice(0, 10)}...`);
+        showToast(`✅ Escrow confirmed! ${amountSUI} SUI sent`);
+
+        // Redirect to Home after 2 seconds
+        setTimeout(() => {
+          setSelectedTab('home');
+          setSelectedEscrow(null);
+        }, 2000);
       } else {
         throw new Error(result.error || 'Transaction failed');
       }

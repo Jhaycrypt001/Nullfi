@@ -9,7 +9,7 @@ const suiClient = new SuiClient({ url: getFullnodeUrl('testnet') });
 
 export class RealBlockchainExecutor {
   /**
-   * Execute real SUI transfer on blockchain - ACTUAL TRANSACTION
+   * Execute real SUI transfer on blockchain - WITH COIN SELECTION
    */
   static async executeRealTransaction(
     walletAddress: string,
@@ -31,29 +31,35 @@ export class RealBlockchainExecutor {
         throw new Error('❌ Wallet not connected. Please connect your Sui Wallet first.');
       }
 
-      console.log('📝 Building transaction block...');
+      console.log('📝 Building simple SUI transfer...');
 
-      // Create a real transaction block
+      // Create transaction block for simple transfer
       const txBlock = new TransactionBlock();
       txBlock.setSender(walletAddress);
 
-      // Split coins to get exact amount
-      const [coin] = txBlock.splitCoins(txBlock.gas, [txBlock.pure.u64(amountInMist)]);
+      // Split the gas coin to get the exact amount needed
+      const [suiCoin] = txBlock.splitCoins(txBlock.gas, [
+        txBlock.pure.u64(amountInMist),
+      ]);
 
-      // Transfer to recipient
-      txBlock.transferObjects([coin], txBlock.pure.address(recipientAddress));
+      // Transfer the coin to recipient
+      txBlock.transferObjects([suiCoin], txBlock.pure.address(recipientAddress));
 
-      console.log('🔐 Requesting wallet to sign and execute transaction...');
+      console.log('🔐 Requesting wallet to execute transfer...');
 
-      // Sign and execute with wallet - THIS WILL DEDUCT FROM WALLET
+      // Execute with wallet - ACTUAL blockchain call
       const result = await connectedWallet.signAndExecuteTransactionBlock({
         transactionBlock: txBlock,
+        options: {
+          showEffects: true,
+          showEvents: true,
+        },
       });
 
-      const digest = result.digest || result.transactionHash;
+      const digest = result.digest;
 
       console.log('✅ TRANSACTION EXECUTED!', digest);
-      console.log('💎 SUI deducted from your wallet!');
+      console.log('💎 SUI transferred from your wallet!');
 
       return digest;
     } catch (error) {
