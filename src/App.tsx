@@ -724,10 +724,27 @@ const Dashboard: React.FC = () => {
       if (result.success) {
         showToast(`✅ Escrow confirmed! ${amountSUI} SUI sent`);
 
+        // Update escrow status in database
+        try {
+          await api.request(`/api/escrow/${selectedEscrow.id}/status`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              status: 'active',
+              transactionHash: result.digest || result.transactionDigest,
+              freelancerAddress: freelancerAddress,
+            }),
+          });
+        } catch (e) {
+          console.error('Failed to update escrow status:', e);
+        }
+
         // Redirect to Home after 2 seconds
         setTimeout(() => {
           setSelectedTab('home');
           setSelectedEscrow(null);
+          // Refresh all data
+          fetchEscrows();
+          fetchTransactions();
         }, 2000);
       } else {
         throw new Error(result.error || 'Transaction failed');

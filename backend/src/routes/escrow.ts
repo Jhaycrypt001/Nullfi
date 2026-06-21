@@ -170,4 +170,30 @@ router.post("/:id/dispute", async (req: Request, res: Response) => {
   }
 });
 
+// Update escrow status after blockchain confirmation
+router.put("/:escrowId/status", async (req: Request, res: Response) => {
+  try {
+    const { escrowId } = req.params;
+    const { status, transactionHash, freelancerAddress } = req.body;
+
+    const escrow = await prisma.escrow.update({
+      where: { id: escrowId },
+      data: {
+        status: status || 'active',
+        transactionHash: transactionHash,
+        freelancerAddress: freelancerAddress || undefined,
+      },
+    });
+
+    res.json({
+      success: true,
+      escrow,
+    });
+  } catch (error: any) {
+    res.status(400).json({
+      error: error.message,
+    });
+  }
+});
+
 export default router;
