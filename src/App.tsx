@@ -717,7 +717,8 @@ const Dashboard: React.FC = () => {
         selectedEscrow.id,
         user.walletAddress,
         freelancerAddress,
-        totalAmountMist
+        totalAmountMist,
+        wallet // Pass the wallet object
       );
 
       if (result.success) {

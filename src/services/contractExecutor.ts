@@ -96,11 +96,12 @@ export class ContractExecutor {
     escrowId: string,
     clientAddress: string,
     freelancerAddress: string,
-    amountMist: number
+    amountMist: number,
+    wallet?: any
   ): Promise<ContractResult> {
     try {
       // Execute real blockchain transaction
-      return await this.signTransaction(clientAddress, freelancerAddress, amountMist);
+      return await this.signTransaction(clientAddress, freelancerAddress, amountMist, wallet);
     } catch (error) {
       return {
         success: false,
@@ -116,7 +117,8 @@ export class ContractExecutor {
   static async signTransaction(
     senderAddress: string,
     recipientAddress: string,
-    amountMist: number
+    amountMist: number,
+    wallet?: any
   ): Promise<ContractResult> {
     try {
       console.log('🔔 REAL BLOCKCHAIN EXECUTION...');
@@ -125,7 +127,8 @@ export class ContractExecutor {
         senderAddress,
         recipientAddress,
         amountMist,
-        'Escrow release'
+        'Escrow release',
+        wallet
       );
 
       return {
